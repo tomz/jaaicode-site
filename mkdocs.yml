@@ -1,0 +1,71 @@
+site_name: jaaicode
+site_url: https://jaaicode.org
+site_description: Just Another AI Coder — terminal-first AI coding assistant.
+site_author: jaaicode
+repo_url: https://github.com/tomz/jaaicode-site
+repo_name: tomz/jaaicode-site
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Features: features.md
+  - Install: install.md
+  - Showcase: showcase.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tomz/jaaicode-site
+    - icon: fontawesome/solid/globe
+      link: https://jaaiworks.org
+      name: jaaiworks.org — built with jaaicode

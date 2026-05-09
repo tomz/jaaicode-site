@@ -1,0 +1,32 @@
+# This workflow is OPTIONAL when you use Cloudflare Pages' built-in
+# Git integration — Cloudflare runs `mkdocs build` itself.
+#
+# Keep it for two reasons:
+#   1. CI: every PR gets a build check, so you catch broken Markdown
+#      before it reaches Cloudflare.
+#   2. Portability: if you ever move off Cloudflare, this is the
+#      ready-to-go GitHub Pages publisher.
+
+name: Build site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: mkdocs build --strict
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site/
