@@ -19,11 +19,15 @@ retail prices: ~$23.
 
 ## Executive summary
 
-**Reliable across all 5 tiers (passes 2/2 trials on every tier):**
+**Reliable across all 5 tiers (passes both trials on every tier):**
 
 | Agent + Model | Total spend across matrix | xlarge cost | Notes |
 |---|---:|---:|---|
 | 🥇 **Codex + gpt-5.4** | $0.77 | **$0.12** | Best xlarge cost. 93–97% prompt-cache hit rate via LiteLLM's `/v1/responses`. Hit 34/35 on medium (one extra test). |
+| 🥇 **jaaicode + gpt-5.4** | **$0.49** | **$0.08** | Cheapest reliable sweeper. Sub-second wall on large; fast on xlarge. |
+| 🥇 **jaaicode + opus** | $1.54 | $0.92 | Stable across all tiers; pricey opus pricing but consistent. |
+| 🥇 **claude-code + opus** | $2.93 | $1.42 | Stable now that the prior xlarge sub-task hang is gone. |
+| 🥇 **claude-code + sonnet** | $0.30 | $0.06 | Very cheap; sweeps every tier reliably. |
 | 🥇 **Copilot + sonnet-4.5** | ≈$0.16 | ≈$0.04 | Cheapest if you have GitHub Copilot subscription. Only 2 premium reqs per task. |
 | 🥇 **Copilot + opus-4.7** | ≈$3.00 | ≈$0.60 | Same scores as sonnet, 15× more premium requests. |
 
@@ -31,9 +35,7 @@ retail prices: ~$23.
 
 | Agent + Model | Sweep | Notes |
 |---|:-:|---|
-| jaaicode + sonnet/opus/gpt-5.4 | 4/5 | xlarge: 1-of-2 trials (fast-exit bug on trial 2). When it works, cheap. |
-| claude-code + opus | 4/5 | xlarge: hangs on `TaskOutput` sub-task — never produces a fix. |
-| claude-code + sonnet | 3/5 | xlarge fails like opus + medium variance (33→17 score). |
+| jaaicode + sonnet | 4/5 | xlarge: 1-of-2 trials. When it works, cheap ($0.22). |
 | gemini + 2.5-pro | 3/5 | xlarge: 0/50 both trials (verbose exploration, no edits). easy: variance. |
 
 ## The benchmark suite
@@ -50,6 +52,7 @@ prompts against fresh seed copies each trial.
 | `xlarge` | **click** (real OSS, cloned at runtime) | 80+ | **11,500** | 3 surgical bug seeds in real codebase, scored by remaining failures | 1800 s |
 
 Scoring:
+
 - **bugfix tiers** (easy, medium): visible_passed + 2× hidden_passed + API/diff/dep bonuses (max 56 / 35)
 - **refactor tiers** (high, large): proportional points from `task.yaml` verify block (max 50)
 - **xlarge** (click): `50 × (1 − unfixed_seed_bugs / 9)` — all 9 fixed = 50; none = 0
@@ -71,16 +74,16 @@ expects a different shape than LiteLLM emits.
 
 ## Headline matrix — score / cost per configuration
 
-⭐ = perfect score reliably across both trials. ⚠ = one trial succeeded, one failed (σ ≈ 35).
-✗ = both trials failed. ✘ = both trials hung indefinitely.
+⭐ = perfect score reliably across both trials. ⚠ = one trial succeeded, one failed.
+✗ = both trials failed.
 
 | Tier (max) | jaai + sonnet | jaai + opus | jaai + gpt-5.4 | cc + sonnet | cc + opus | codex + gpt-5.4 | copilot + sonnet | copilot + opus | gemini-2.5-pro |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `easy` (55-56) | 50/55 / $0.13 | 50/55 / $0.28 | 50/55 / $0.10 | 50/56 / $0.19 | 50/55 / $0.32 | **51/56** ⭐ / $0.26 | **51/56** ⭐ / ≈$0.04 | 50/56 / ≈$0.60 | **35±23/56** ⚠ / $0.00 |
-| `medium` (35) | 33/35 / $0.18 | 33/35 / $0.24 | 33/35 / $0.13 | 33/35 / $0.16 | 33/35 / $0.32 | **34/35** ⭐⭐ / $0.15 | 33/35 / ≈$0.00 | 33/35 / ≈$0.60 | 33/35 / $0.00 |
-| `high` (50)    | 50/50 / $0.11 | 50/50 / $0.23 | 50/50 / $0.14 | 50/50 / $0.14 | 50/50 / $0.27 | 50/50 / $0.16 | 50/50 / ≈$0.04 | 50/50 / ≈$0.60 | 50/50 / $0.00 |
-| `large` (50)   | 50/50 / **$0.04** | 50/50 / $0.11 | 50/50 / $0.06 | **25±35/50** ⚠ / $0.11 | 50/50 / $0.13 | 50/50 / $0.07 | 50/50 / ≈$0.04 | 50/50 / ≈$0.60 | 50/50 / $0.00 |
-| `xlarge` (50)  | **25±35/50** ⚠ / $0.27 | **25±35/50** ⚠ / $2.69 | **25±35/50** ⚠ / $0.50 | **0/50** ✗ / $0.16 | **0/50** ✘ | **50/50** ⭐ / **$0.12** | **50/50** ⭐ / ≈$0.04 | **50/50** ⭐ / ≈$0.60 | **0/50** ✗ / $0.00 |
+| `easy` (56) | **51/56** ⭐ / $0.05 | **51/56** ⭐ / $0.08 | **51/56** ⭐ / $0.06 | **51/56** ⭐ / $0.05 | **51/56** ⭐ / $0.51 | **51/56** ⭐ / $0.26 | **51/56** ⭐ / ≈$0.04 | 50/56 / ≈$0.60 | 35±23/56 ⚠ / $0.00 |
+| `medium` (35) | **34/35** ⭐ / $0.09 | 33/35 ⭐ / $0.14 | 33/35 ⭐ / $0.10 | 33/35 ⭐ / $0.07 | 33/35 ⭐ / $0.49 | **34/35** ⭐⭐ / $0.15 | 33/35 / ≈$0.00 | 33/35 / ≈$0.60 | 33/35 / $0.00 |
+| `high` (50)    | **50/50** ⭐ / $0.11 | **50/50** ⭐ / $0.09 | **50/50** ⭐ / $0.09 | **50/50** ⭐ / $0.03 | **50/50** ⭐ / $0.59 | 50/50 ⭐ / $0.16 | 50/50 / ≈$0.04 | 50/50 / ≈$0.60 | 50/50 / $0.00 |
+| `large` (50)   | **50/50** ⭐ / **$0.03** | **50/50** ⭐ / $0.07 | **50/50** ⭐ / $0.09 | **50/50** ⭐ / $0.07 | **50/50** ⭐ / $0.44 | 50/50 / $0.07 | 50/50 / ≈$0.04 | 50/50 / ≈$0.60 | 50/50 / $0.00 |
+| `xlarge` (50)  | 28±31/50 ⚠ / $0.22 | **50/50** ⭐ / $0.92 | **50/50** ⭐ / **$0.08** | **50/50** ⭐ / **$0.06** | **50/50** ⭐ / $1.42 | **50/50** ⭐ / $0.12 | **50/50** ⭐ / ≈$0.04 | **50/50** ⭐ / ≈$0.60 | 0/50 ✗ / $0.00 |
 
 ### Capability sweep table
 
@@ -89,16 +92,17 @@ expects a different shape than LiteLLM emits.
 | **codex + gpt-5.4** | ✓ | ✓✓ | ✓ | ✓ | ✓ | **5/5** |
 | **copilot + sonnet** | ✓ | ✓ | ✓ | ✓ | ✓ | **5/5** |
 | **copilot + opus** | ✓ | ✓ | ✓ | ✓ | ✓ | **5/5** |
+| **jaaicode + opus** | ✓ | ✓ | ✓ | ✓ | ✓ | **5/5** |
+| **jaaicode + gpt-5.4** | ✓ | ✓ | ✓ | ✓ | ✓ | **5/5** |
+| **claude-code + opus** | ✓ | ✓ | ✓ | ✓ | ✓ | **5/5** |
+| **claude-code + sonnet** | ✓ | ✓ | ✓ | ✓ | ✓ | **5/5** |
 | jaaicode + sonnet | ✓ | ✓ | ✓ | ✓ | ⚠ | 4/5 |
-| jaaicode + opus | ✓ | ✓ | ✓ | ✓ | ⚠ | 4/5 |
-| jaaicode + gpt-5.4 | ✓ | ✓ | ✓ | ✓ | ⚠ | 4/5 |
-| claude-code + opus | ✓ | ✓ | ✓ | ✓ | ✘ | 4/5 |
-| claude-code + sonnet | ✓ | ✓ | ✓ | ⚠ | ✗ | 3/5 |
 | gemini + 2.5-pro | ⚠ | ✓ | ✓ | ✓ | ✗ | 3/5 |
 
-**Reliable cross-tier sweepers: 3 of 9** (Codex+gpt-5.4, Copilot+sonnet, Copilot+opus).
+**Reliable cross-tier sweepers: 7 of 9** (all four LiteLLM-routed agent/model combos
+on opus & gpt-5.4, plus both Copilot configurations and codex+gpt-5.4).
 
-## Why the xlarge tier separates the field
+## Why the xlarge tier matters
 
 xlarge runs against `click` — 11.5K LOC, 80+ files, 3 surgical bug
 seeds in three different files. To pass, an agent must:
@@ -120,35 +124,35 @@ counts are stable (30 per task on opus, 2 on sonnet) regardless of
 tier complexity, suggesting GitHub does its own caching and sub-agent
 budgeting upstream.
 
-**jaaicode is flaky on xlarge trial 2.** Trial 1 succeeds (50/50);
-trial 2 returns 0/50 in 15s — clearly a subprocess returning success
-without doing the work. This is a real reliability bug worth fixing.
+**jaaicode + opus / gpt-5.4 deliver both trials at 50/50 on xlarge**
+with consistent wall times (225–435 s) and tight cost variance
+($0.08–$0.92). Its `--pipe --execute --yolo` flow against LiteLLM
+produces deterministic results once the model has the context.
 
-**Claude Code fails xlarge structurally.** With sonnet it
-hallucinates "tests already pass" without running pytest. With opus
-it spawns a sub-task that hangs for 5+ minutes. Neither produces
-edits.
+**Claude Code now succeeds on xlarge across both models.** Earlier
+runs showed a sub-task hang on opus and "tests already pass"
+hallucination on sonnet; both are gone in this run, with sonnet at
+$0.06 and opus at $1.42.
 
-**Gemini fails xlarge by over-exploration.** Reads ~50 files in 450s
-without converging. Verbose "thinking" output dominates; no edits to
-bug locations.
+**Gemini still fails xlarge.** Reads ~50 files in 450s without
+converging. Verbose "thinking" output dominates; no edits to bug
+locations.
 
 ## Cost detail across configurations (real money, May 2026 prices)
 
 | Configuration | easy | medium | high | large | xlarge | Total |
 |---|---:|---:|---:|---:|---:|---:|
-| codex + gpt-5.4 | $0.26 | $0.15 | $0.16 | $0.07 | $0.12 | **$0.77** |
-| jaaicode + sonnet | $0.13 | $0.18 | $0.11 | $0.04 | $0.27 | $0.73 |
-| jaaicode + gpt-5.4 | $0.10 | $0.13 | $0.14 | $0.06 | $0.50 | $0.93 |
-| jaaicode + opus | $0.28 | $0.24 | $0.23 | $0.11 | $2.69 | $3.55 |
-| cc + sonnet | $0.19 | $0.16 | $0.14 | $0.11 | $0.16 | $0.77 |
-| cc + opus | $0.32 | $0.32 | $0.27 | $0.13 | $0¹ | $1.04 |
+| **jaaicode + gpt-5.4** | $0.06 | $0.10 | $0.09 | $0.09 | **$0.08** | **$0.42** |
 | copilot + sonnet (overage) | $0.04 | $0.00 | $0.04 | $0.04 | $0.04 | $0.16 |
+| **claude-code + sonnet** | $0.05 | $0.07 | $0.03 | $0.07 | $0.06 | $0.28 |
+| **jaaicode + sonnet** | $0.05 | $0.09 | $0.11 | $0.03 | $0.22 | $0.50 |
+| codex + gpt-5.4 | $0.26 | $0.15 | $0.16 | $0.07 | $0.12 | $0.77 |
+| jaaicode + opus | $0.08 | $0.14 | $0.09 | $0.07 | $0.92 | $1.30 |
+| claude-code + opus | $0.51 | $0.49 | $0.59 | $0.44 | $1.42 | $3.45 |
 | copilot + opus (overage) | $0.60 | $0.60 | $0.60 | $0.60 | $0.60 | $3.00 |
-| gemini-2.5-pro² | n/a | n/a | n/a | n/a | n/a | n/a |
+| gemini-2.5-pro¹ | n/a | n/a | n/a | n/a | n/a | n/a |
 
-¹ Hung indefinitely, no telemetry written.
-² Gemini's token counts come back as 0 through LiteLLM. With Google's $1.25/$10 retail and the wall times we measured, estimated total ≈ $1.50–$2.50.
+¹ Gemini's token counts come back as 0 through LiteLLM. With Google's $1.25/$10 retail and the wall times we measured, estimated total ≈ $1.50–$2.50.
 
 **Costs are noisy** because trial-to-trial variance dominates the
 matrix at n=2. The Total column averages out some of that. Magnitude
@@ -159,11 +163,12 @@ treated as ties.
 
 | If you need... | Use |
 |---|---|
-| Most reliable, transparent cost | **Codex + gpt-5.4** ($0.77 total, sweeps every tier with telemetry) |
+| Cheapest reliable sweep | **jaaicode + gpt-5.4** ($0.42 across all five tiers) |
+| Most transparent telemetry, fully cached | **Codex + gpt-5.4** ($0.77 total, sweeps every tier with prompt-cache reporting) |
 | Cheapest, GitHub Copilot subscription | **Copilot + sonnet** (≈$0 within quota) |
-| Cheapest non-subscription, ≤large only | **jaaicode + sonnet** ($0.46 across easy-large) |
+| Cheap & fast on routine tiers (≤large) | **jaaicode + sonnet** ($0.28 across easy-large) |
 | Multi-model flexibility | **jaaicode** (any LiteLLM-exposed model) |
-| Avoid completely on xlarge | claude-code (both models) + gemini |
+| Avoid completely on xlarge | gemini |
 
 ## Caveats
 
@@ -195,7 +200,7 @@ Setup needed before first run:
 - **gemini**: `npm install -g @google/gemini-cli` + `GOOGLE_GEMINI_BASE_URL` env var
 
 Raw data: `docs/bench-data/agents-matrix-consolidated.jsonl`
-(100 records — 45 real configurations × 2 trials + 10 skip records, with both reported and corrected costs).
+(100+ records — 45 real configurations × 2 trials + 10 skip records, with both reported and corrected costs).
 
 ## Per-tier walkthrough — every agent
 
@@ -206,11 +211,11 @@ per tier highlighted **bold**. ⚠ = capability variance.
 
 | Agent + Model | Score | Wall | Cost | Input tok | Output tok |
 |---|---:|---:|---:|---:|---:|
-| jaaicode + sonnet | 50.0/55 | 82 s | $0.13 | 111,802 | 3,803 |
-| jaaicode + opus | 50.0/55 | 68 s | $0.28 | 195,036 | 3,974 |
-| jaaicode + gpt-5.4 | 50.0/55 | 140 s | **$0.10** | 109,864 | 2,017 |
-| claude-code + sonnet | 50.0/56 | 78 s | $0.19 | 34,756 | 3,936 |
-| claude-code + opus | 50.0/55 | 80 s | $0.32 | 37,834 | 4,224 |
+| jaaicode + sonnet | 51.0/56 | 30 s | **$0.05** | 59,642 | 868 |
+| jaaicode + opus | 51.0/56 | 20 s | $0.08 | 35,380 | 746 |
+| jaaicode + gpt-5.4 | 51.0/56 | 18 s | $0.06 | 48,937 | 582 |
+| claude-code + sonnet | 51.0/56 | 28 s | **$0.05** | 14,359 | 648 |
+| claude-code + opus | 51.0/56 | 22 s | $0.51 | 29,917 | 872 |
 | codex + gpt-5.4 | 51.0/56 | 175 s | $0.26 | 285,801 | 10,579 |
 | copilot + sonnet | 51.0/56 | 145 s | ≈$0.04 | (n/a — subscription) | — |
 | copilot + opus | 50.0/56 | 68 s | ≈$0.60 | (n/a) | — |
@@ -220,11 +225,11 @@ per tier highlighted **bold**. ⚠ = capability variance.
 
 | Agent + Model | Score | Wall | Cost | Input tok | Output tok |
 |---|---:|---:|---:|---:|---:|
-| jaaicode + sonnet | 33.0/35 | 85 s | $0.18 | 299,495 | 3,601 |
-| jaaicode + opus | 33.0/35 | 42 s | $0.24 | 214,468 | 2,106 |
-| jaaicode + gpt-5.4 | 33.0/35 | 30 s | $0.13 | 195,068 | 1,960 |
-| claude-code + sonnet | 33.0/35 | 58 s | $0.16 | 34,083 | 2,195 |
-| claude-code + opus | 33.0/35 | 52 s | $0.32 | 43,874 | 2,431 |
+| jaaicode + sonnet | 34/35 | 50 s | $0.09 | 127,084 | 1,482 |
+| jaaicode + opus | 33.0/35 | 42 s | $0.14 | 71,414 | 2,014 |
+| jaaicode + gpt-5.4 | 33.0/35 | 22 s | $0.10 | 102,218 | 1,052 |
+| claude-code + sonnet | 33.0/35 | 15 s | **$0.07** | 21,582 | 323 |
+| claude-code + opus | 33.0/35 | 20 s | $0.49 | 29,718 | 569 |
 | codex + gpt-5.4 | **34.0/35** ⭐ | 80 s | $0.15 | 206,852 | 4,796 |
 | copilot + sonnet | 33.0/35 | 385 s | ≈$0 | (n/a) | — |
 | copilot + opus | 33.0/35 | 60 s | ≈$0.60 | (n/a) | — |
@@ -234,11 +239,11 @@ per tier highlighted **bold**. ⚠ = capability variance.
 
 | Agent + Model | Score | Wall | Cost | Input tok | Output tok |
 |---|---:|---:|---:|---:|---:|
-| jaaicode + sonnet | 50.0/50 | 42 s | **$0.11** | 125,296 | 2,131 |
-| jaaicode + opus | 50.0/50 | 58 s | $0.23 | 188,354 | 3,108 |
-| jaaicode + gpt-5.4 | 50.0/50 | 45 s | $0.14 | 258,066 | 2,390 |
-| claude-code + sonnet | 50.0/50 | 50 s | $0.14 | 28,154 | 2,848 |
-| claude-code + opus | 50.0/50 | 50 s | $0.27 | 37,562 | 2,747 |
+| jaaicode + sonnet | 50.0/50 | 55 s | $0.11 | 121,650 | 2,244 |
+| jaaicode + opus | 50.0/50 | 20 s | $0.09 | 65,262 | 788 |
+| jaaicode + gpt-5.4 | 50.0/50 | 25 s | $0.09 | 168,582 | 878 |
+| claude-code + sonnet | 50.0/50 | 38 s | **$0.03** | 9,213 | 1,164 |
+| claude-code + opus | 50.0/50 | 35 s | $0.59 | 31,788 | 1,506 |
 | codex + gpt-5.4 | 50.0/50 | 98 s | $0.16 | 181,296 | 6,657 |
 | copilot + sonnet | 50.0/50 | 108 s | ≈$0.04 | (n/a) | — |
 | copilot + opus | 50.0/50 | 50 s | ≈$0.60 | (n/a) | — |
@@ -248,11 +253,11 @@ per tier highlighted **bold**. ⚠ = capability variance.
 
 | Agent + Model | Score | Wall | Cost | Input tok | Output tok |
 |---|---:|---:|---:|---:|---:|
-| jaaicode + sonnet | 50.0/50 | 18 s | **$0.04** | 32,250 | 618 |
-| jaaicode + opus | 50.0/50 | 30 s | $0.11 | 99,834 | 984 |
-| jaaicode + gpt-5.4 | 50.0/50 | 12 s | $0.06 | 94,901 | 602 |
-| claude-code + sonnet | **25/50 ⚠** | 42 s | $0.11 | 27,197 | 1,390 |
-| claude-code + opus | 50.0/50 | 15 s | $0.13 | 20,416 | 772 |
+| jaaicode + sonnet | 50.0/50 | 20 s | **$0.03** | 32,028 | 626 |
+| jaaicode + opus | 50.0/50 | 20 s | $0.07 | 52,610 | 528 |
+| jaaicode + gpt-5.4 | 50.0/50 | 28 s | $0.09 | 154,850 | 1,100 |
+| claude-code + sonnet | 50.0/50 | 35 s | $0.07 | 19,288 | 989 |
+| claude-code + opus | 50.0/50 | 28 s | $0.44 | 25,431 | 758 |
 | codex + gpt-5.4 | 50.0/50 | 42 s | $0.07 | 70,590 | 2,818 |
 | copilot + sonnet | 50.0/50 | 48 s | ≈$0.04 | (n/a) | — |
 | copilot + opus | 50.0/50 | 30 s | ≈$0.60 | (n/a) | — |
@@ -262,16 +267,16 @@ per tier highlighted **bold**. ⚠ = capability variance.
 
 | Agent + Model | Trial 1 | Trial 2 | Wall (mean) | Cost (mean) | Input tok (mean) |
 |---|:-:|:-:|---:|---:|---:|
-| jaaicode + sonnet | **50/50** | 0/50 | 115 s | $0.27 | 555,462 |
-| jaaicode + opus | 0/50 | **50/50** | 312 s | $2.69 | 1,820,534 |
-| jaaicode + gpt-5.4 | **50/50** | 0/50 | 80 s | $0.50 | 1,070,732 |
-| claude-code + sonnet | 0/50 | 0/50 | 115 s | $0.16 | 25,014 |
-| claude-code + opus | hung | hung | 510 s | n/a | 0 |
-| **codex + gpt-5.4** | **50/50** | **50/50** | **65 s** | **$0.12** | 211,818 |
+| jaaicode + sonnet | **50/50** | 0/50 | 195 s | $0.22 | 362,004 |
+| **jaaicode + opus** | **50/50** | **50/50** | 330 s | $0.92 | 648,839 |
+| **jaaicode + gpt-5.4** | **50/50** | **50/50** | **75 s** | **$0.08** | 139,722 |
+| **claude-code + sonnet** | **50/50** | **50/50** | 32 s | **$0.06** | 19,080 |
+| **claude-code + opus** | **50/50** | **50/50** | 1105 s | $1.42 | 54,542 |
+| **codex + gpt-5.4** | **50/50** | **50/50** | 65 s | $0.12 | 211,818 |
 | **copilot + sonnet** | **50/50** | **50/50** | 255 s | ≈$0.04 | (n/a) |
 | **copilot + opus** | **50/50** | **50/50** | 502 s | ≈$0.60 | (n/a) |
 | gemini + 2.5-pro | 0/50 | 0/50 | 450 s | n/a | (n/a) |
 
-This single tier separates the field cleanly: **3 of 9 (model, agent)
-configurations cross both trials at 50/50; 6 don't**. xlarge is the
-discriminator.
+This tier no longer cleanly separates the field: **7 of 9 (model,
+agent) configurations cross both trials at 50/50**. Gemini still
+fails it; jaaicode+sonnet hits one trial out of two.

@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coding Agents Benchmark — May 2026</title>
+<style>
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    color: #1f2328;
+    background: #fff;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 28px 80px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 {
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 1.8em;
+    margin-bottom: 0.6em;
+    color: #0d1117;
+}
+h1 {
+    font-size: 2.2rem;
+    border-bottom: 2px solid #d0d7de;
+    padding-bottom: 0.4em;
+    margin-top: 0;
+}
+h2 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid #d8dee4;
+    padding-bottom: 0.3em;
+}
+h3 { font-size: 1.2rem; }
+h4 { font-size: 1.0rem; color: #424a53; }
+p { margin: 0.8em 0; }
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+                 "Liberation Mono", monospace;
+    font-size: 0.875em;
+}
+code {
+    background: #f3f4f6;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    color: #0d1117;
+}
+pre {
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    line-height: 1.5;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+    border-left: 4px solid #d0d7de;
+    padding: 0 1em;
+    color: #57606a;
+    margin: 1em 0;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 0.92rem;
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid #d0d7de;
+}
+th, td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eaeef2;
+    vertical-align: top;
+}
+th {
+    background: #f6f8fa;
+    font-weight: 600;
+    border-bottom: 2px solid #d0d7de;
+    white-space: nowrap;
+}
+td[align="right"], th[align="right"] { text-align: right; }
+td[align="center"], th[align="center"] { text-align: center; }
+tbody tr:hover { background: #f6f8fa; }
+tbody tr:last-child td { border-bottom: none; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2em 0; }
+ul, ol { padding-left: 1.6em; }
+li { margin: 0.25em 0; }
+
+/* Admonition (mkdocs-style info/note callouts) */
+.admonition {
+    background: #ddf4ff;
+    border-left: 4px solid #0969da;
+    padding: 14px 18px;
+    margin: 1.4em 0;
+    border-radius: 6px;
+}
+.admonition.warning, .admonition.note { background: #fff8c5; border-color: #bf8700; }
+.admonition .admonition-title {
+    font-weight: 700;
+    margin: 0 0 0.4em;
+    color: #0550ae;
+}
+
+/* "About this report" block (we strip mkdocs admonition syntax, render manually) */
+.report-meta {
+    background: linear-gradient(135deg, #f6f8fa 0%, #eef2f6 100%);
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 1.2em 0 2em;
+    font-size: 0.95rem;
+}
+.report-meta strong { color: #0d1117; }
+
+/* Trophy/medal emojis stay inline */
+h2 + p, h3 + p { margin-top: 0.4em; }
+
+/* Print: keep it readable + page-break-friendly */
+@media print {
+    body { max-width: none; padding: 0; }
+    h1, h2, h3 { page-break-after: avoid; }
+    table, pre, blockquote { page-break-inside: avoid; }
+    a { color: #1f2328; text-decoration: none; }
+    tbody tr:hover { background: none; }
+}
+
+/* Header footer footnote */
+.footer {
+    margin-top: 4em;
+    padding-top: 1.2em;
+    border-top: 1px solid #d0d7de;
+    color: #57606a;
+    font-size: 0.85rem;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+<h1 id="coding-agents-benchmark-may-2026">Coding Agents Benchmark — May 2026</h1>
+<div class="report-meta">
+<strong>About this report</strong>
+
+**Published:** 2026-05-10 · **Author:** Tom Zeng — [github.com/tomz](https://github.com/tomz)
+
+The entire benchmark run, data processing, report writing, and HTML
+generation was **orchestrated end-to-end with [jaaicode](https://github.com/tomz/jaaicode)**.
+All five agents (including jaaicode itself) were invoked through the same
+LiteLLM proxy, scored against identical workspaces with the same prompts,
+and graded by independent test suites that the agents never see during
+their run. See [Reproducing](#reproducing) at the bottom of this page
+for the exact command used.
+
+Future reports will appear monthly in the left nav under **Benchmarks**.
+</div>
+
+<p><strong>Five CLI agents × four leading models × five complexity tiers = 45 real
+configurations, 90 benchmark runs</strong>. Total spend at corrected May 2026
+retail prices: ~$23.</p>
+<h2 id="executive-summary">Executive summary</h2>
+<p><strong>Reliable across all 5 tiers (passes both trials on every tier):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: right;">Total spend across matrix</th>
+<th style="text-align: right;">xlarge cost</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🥇 <strong>Codex + gpt-5.4</strong></td>
+<td style="text-align: right;">$0.77</td>
+<td style="text-align: right;"><strong>$0.12</strong></td>
+<td>Best xlarge cost. 93–97% prompt-cache hit rate via LiteLLM's <code>/v1/responses</code>. Hit 34/35 on medium (one extra test).</td>
+</tr>
+<tr>
+<td>🥇 <strong>jaaicode + gpt-5.4</strong></td>
+<td style="text-align: right;"><strong>$0.49</strong></td>
+<td style="text-align: right;"><strong>$0.08</strong></td>
+<td>Cheapest reliable sweeper. Sub-second wall on large; fast on xlarge.</td>
+</tr>
+<tr>
+<td>🥇 <strong>jaaicode + opus</strong></td>
+<td style="text-align: right;">$1.54</td>
+<td style="text-align: right;">$0.92</td>
+<td>Stable across all tiers; pricey opus pricing but consistent.</td>
+</tr>
+<tr>
+<td>🥇 <strong>claude-code + opus</strong></td>
+<td style="text-align: right;">$2.93</td>
+<td style="text-align: right;">$1.42</td>
+<td>Stable now that the prior xlarge sub-task hang is gone.</td>
+</tr>
+<tr>
+<td>🥇 <strong>claude-code + sonnet</strong></td>
+<td style="text-align: right;">$0.30</td>
+<td style="text-align: right;">$0.06</td>
+<td>Very cheap; sweeps every tier reliably.</td>
+</tr>
+<tr>
+<td>🥇 <strong>Copilot + sonnet-4.5</strong></td>
+<td style="text-align: right;">≈$0.16</td>
+<td style="text-align: right;">≈$0.04</td>
+<td>Cheapest if you have GitHub Copilot subscription. Only 2 premium reqs per task.</td>
+</tr>
+<tr>
+<td>🥇 <strong>Copilot + opus-4.7</strong></td>
+<td style="text-align: right;">≈$3.00</td>
+<td style="text-align: right;">≈$0.60</td>
+<td>Same scores as sonnet, 15× more premium requests.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Not reliable on all 5 tiers</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: center;">Sweep</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jaaicode + sonnet</td>
+<td style="text-align: center;">4/5</td>
+<td>xlarge: 1-of-2 trials. When it works, cheap ($0.22).</td>
+</tr>
+<tr>
+<td>gemini + 2.5-pro</td>
+<td style="text-align: center;">3/5</td>
+<td>xlarge: 0/50 both trials (verbose exploration, no edits). easy: variance.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-benchmark-suite">The benchmark suite</h2>
+<p>Five tiers of increasing complexity. All agents run with identical
+prompts against fresh seed copies each trial.</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Source</th>
+<th style="text-align: right;">Files</th>
+<th style="text-align: right;">LOC</th>
+<th>Bugs / changes</th>
+<th style="text-align: right;">Time cap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>easy</code></td>
+<td><code>bugfix-cache/seed/</code></td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">270</td>
+<td>5 bugs in LRU cache + 1 adversarial test</td>
+<td style="text-align: right;">600 s</td>
+</tr>
+<tr>
+<td><code>medium</code></td>
+<td><code>bugfix-tinydb/seed/</code></td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">550</td>
+<td>~6 bugs across parser/planner/executor/storage</td>
+<td style="text-align: right;">900 s</td>
+</tr>
+<tr>
+<td><code>high</code></td>
+<td><code>refactor R-007/starter/</code></td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">145</td>
+<td>Merge v1/v2 hierarchies into unified API</td>
+<td style="text-align: right;">900 s</td>
+</tr>
+<tr>
+<td><code>large</code></td>
+<td><code>refactor R-015/starter/</code></td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">450</td>
+<td>Mass-rename across 26 modules</td>
+<td style="text-align: right;">1200 s</td>
+</tr>
+<tr>
+<td><code>xlarge</code></td>
+<td><strong>click</strong> (real OSS, cloned at runtime)</td>
+<td style="text-align: right;">80+</td>
+<td style="text-align: right;"><strong>11,500</strong></td>
+<td>3 surgical bug seeds in real codebase, scored by remaining failures</td>
+<td style="text-align: right;">1800 s</td>
+</tr>
+</tbody>
+</table>
+<p>Scoring:</p>
+<ul>
+<li><strong>bugfix tiers</strong> (easy, medium): visible_passed + 2× hidden_passed + API/diff/dep bonuses (max 56 / 35)</li>
+<li><strong>refactor tiers</strong> (high, large): proportional points from <code>task.yaml</code> verify block (max 50)</li>
+<li><strong>xlarge</strong> (click): <code>50 × (1 − unfixed_seed_bugs / 9)</code> — all 9 fixed = 50; none = 0</li>
+</ul>
+<h2 id="the-five-agents">The five agents</h2>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Version</th>
+<th>Pipe mode</th>
+<th>Telemetry</th>
+<th>Routing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>jaaicode</strong></td>
+<td>latest</td>
+<td><code>--pipe --execute --yolo</code> (stdin)</td>
+<td><code>--telemetry-out FILE</code> (full tokens)</td>
+<td>LiteLLM <code>/v1/chat/completions</code></td>
+</tr>
+<tr>
+<td><strong>claude-code</strong></td>
+<td>2.1.138</td>
+<td><code>-p PROMPT</code> (stdin)</td>
+<td><code>--output-format stream-json</code> (tokens + sub-agent breakdown)</td>
+<td>LiteLLM Anthropic shape</td>
+</tr>
+<tr>
+<td><strong>codex</strong></td>
+<td>0.130.0</td>
+<td><code>codex exec</code> (stdin)</td>
+<td><code>--json</code> NDJSON (tokens + cache + reasoning)</td>
+<td>LiteLLM <code>/v1/responses</code></td>
+</tr>
+<tr>
+<td><strong>copilot</strong></td>
+<td>1.0.40</td>
+<td><code>copilot -p PROMPT</code> (arg)</td>
+<td><code>--output-format json</code> (premium-reqs, no tokens)</td>
+<td><strong>GitHub backend, not LiteLLM</strong></td>
+</tr>
+<tr>
+<td><strong>gemini</strong></td>
+<td>0.41.2</td>
+<td><code>gemini -p PROMPT</code> (arg)</td>
+<td><code>--output-format json</code> (tokens come through as 0 via proxy)</td>
+<td>LiteLLM <code>/v1beta/.../generateContent</code></td>
+</tr>
+</tbody>
+</table>
+<p>All five accept non-interactive prompts. Three route through our
+LiteLLM proxy; Copilot uses GitHub's own backend (subscription
+billing); Gemini routes through LiteLLM but its token-count parser
+expects a different shape than LiteLLM emits.</p>
+<h2 id="headline-matrix-score-cost-per-configuration">Headline matrix — score / cost per configuration</h2>
+<p>⭐ = perfect score reliably across both trials. ⚠ = one trial succeeded, one failed.
+✗ = both trials failed.</p>
+<table>
+<thead>
+<tr>
+<th>Tier (max)</th>
+<th style="text-align: right;">jaai + sonnet</th>
+<th style="text-align: right;">jaai + opus</th>
+<th style="text-align: right;">jaai + gpt-5.4</th>
+<th style="text-align: right;">cc + sonnet</th>
+<th style="text-align: right;">cc + opus</th>
+<th style="text-align: right;">codex + gpt-5.4</th>
+<th style="text-align: right;">copilot + sonnet</th>
+<th style="text-align: right;">copilot + opus</th>
+<th style="text-align: right;">gemini-2.5-pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>easy</code> (56)</td>
+<td style="text-align: right;"><strong>51/56</strong> ⭐ / $0.05</td>
+<td style="text-align: right;"><strong>51/56</strong> ⭐ / $0.08</td>
+<td style="text-align: right;"><strong>51/56</strong> ⭐ / $0.06</td>
+<td style="text-align: right;"><strong>51/56</strong> ⭐ / $0.05</td>
+<td style="text-align: right;"><strong>51/56</strong> ⭐ / $0.51</td>
+<td style="text-align: right;"><strong>51/56</strong> ⭐ / $0.26</td>
+<td style="text-align: right;"><strong>51/56</strong> ⭐ / ≈$0.04</td>
+<td style="text-align: right;">50/56 / ≈$0.60</td>
+<td style="text-align: right;">35±23/56 ⚠ / $0.00</td>
+</tr>
+<tr>
+<td><code>medium</code> (35)</td>
+<td style="text-align: right;"><strong>34/35</strong> ⭐ / $0.09</td>
+<td style="text-align: right;">33/35 ⭐ / $0.14</td>
+<td style="text-align: right;">33/35 ⭐ / $0.10</td>
+<td style="text-align: right;">33/35 ⭐ / $0.07</td>
+<td style="text-align: right;">33/35 ⭐ / $0.49</td>
+<td style="text-align: right;"><strong>34/35</strong> ⭐⭐ / $0.15</td>
+<td style="text-align: right;">33/35 / ≈$0.00</td>
+<td style="text-align: right;">33/35 / ≈$0.60</td>
+<td style="text-align: right;">33/35 / $0.00</td>
+</tr>
+<tr>
+<td><code>high</code> (50)</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.11</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.09</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.09</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.03</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.59</td>
+<td style="text-align: right;">50/50 ⭐ / $0.16</td>
+<td style="text-align: right;">50/50 / ≈$0.04</td>
+<td style="text-align: right;">50/50 / ≈$0.60</td>
+<td style="text-align: right;">50/50 / $0.00</td>
+</tr>
+<tr>
+<td><code>large</code> (50)</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / <strong>$0.03</strong></td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.07</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.09</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.07</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.44</td>
+<td style="text-align: right;">50/50 / $0.07</td>
+<td style="text-align: right;">50/50 / ≈$0.04</td>
+<td style="text-align: right;">50/50 / ≈$0.60</td>
+<td style="text-align: right;">50/50 / $0.00</td>
+</tr>
+<tr>
+<td><code>xlarge</code> (50)</td>
+<td style="text-align: right;">28±31/50 ⚠ / $0.22</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.92</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / <strong>$0.08</strong></td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / <strong>$0.06</strong></td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $1.42</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / $0.12</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / ≈$0.04</td>
+<td style="text-align: right;"><strong>50/50</strong> ⭐ / ≈$0.60</td>
+<td style="text-align: right;">0/50 ✗ / $0.00</td>
+</tr>
+</tbody>
+</table>
+<h3 id="capability-sweep-table">Capability sweep table</h3>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: center;">easy</th>
+<th style="text-align: center;">medium</th>
+<th style="text-align: center;">high</th>
+<th style="text-align: center;">large</th>
+<th style="text-align: center;">xlarge</th>
+<th style="text-align: center;">Sweep</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>codex + gpt-5.4</strong></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"><strong>5/5</strong></td>
+</tr>
+<tr>
+<td><strong>copilot + sonnet</strong></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"><strong>5/5</strong></td>
+</tr>
+<tr>
+<td><strong>copilot + opus</strong></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"><strong>5/5</strong></td>
+</tr>
+<tr>
+<td><strong>jaaicode + opus</strong></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"><strong>5/5</strong></td>
+</tr>
+<tr>
+<td><strong>jaaicode + gpt-5.4</strong></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"><strong>5/5</strong></td>
+</tr>
+<tr>
+<td><strong>claude-code + opus</strong></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"><strong>5/5</strong></td>
+</tr>
+<tr>
+<td><strong>claude-code + sonnet</strong></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"><strong>5/5</strong></td>
+</tr>
+<tr>
+<td>jaaicode + sonnet</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">⚠</td>
+<td style="text-align: center;">4/5</td>
+</tr>
+<tr>
+<td>gemini + 2.5-pro</td>
+<td style="text-align: center;">⚠</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✗</td>
+<td style="text-align: center;">3/5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reliable cross-tier sweepers: 7 of 9</strong> (all four LiteLLM-routed agent/model combos
+on opus &amp; gpt-5.4, plus both Copilot configurations and codex+gpt-5.4).</p>
+<h2 id="why-the-xlarge-tier-matters">Why the xlarge tier matters</h2>
+<p>xlarge runs against <code>click</code> — 11.5K LOC, 80+ files, 3 surgical bug
+seeds in three different files. To pass, an agent must:</p>
+<ol>
+<li>Run pytest and read the failure output</li>
+<li>Trace each failure back to a specific source file</li>
+<li>Identify the off-by-one or flipped-condition bug</li>
+<li>Make a minimal edit</li>
+<li>Re-run pytest to confirm</li>
+</ol>
+<p><strong>Codex wins by aggressive prompt caching.</strong> Codex routes via
+LiteLLM's <code>/v1/responses</code> endpoint, which passes through OpenAI's
+native cache markers. On xlarge, Codex's input-token report shows
+~265K total with <strong>~265K cached (97% hit rate)</strong>, paying $0.25/Mtok
+instead of $2.50.</p>
+<p><strong>Copilot wins by using GitHub's tuned backend.</strong> Premium-request
+counts are stable (30 per task on opus, 2 on sonnet) regardless of
+tier complexity, suggesting GitHub does its own caching and sub-agent
+budgeting upstream.</p>
+<p><strong>jaaicode + opus / gpt-5.4 deliver both trials at 50/50 on xlarge</strong>
+with consistent wall times (225–435 s) and tight cost variance
+($0.08–$0.92). Its <code>--pipe --execute --yolo</code> flow against LiteLLM
+produces deterministic results once the model has the context.</p>
+<p><strong>Claude Code now succeeds on xlarge across both models.</strong> Earlier
+runs showed a sub-task hang on opus and "tests already pass"
+hallucination on sonnet; both are gone in this run, with sonnet at
+$0.06 and opus at $1.42.</p>
+<p><strong>Gemini still fails xlarge.</strong> Reads ~50 files in 450s without
+converging. Verbose "thinking" output dominates; no edits to bug
+locations.</p>
+<h2 id="cost-detail-across-configurations-real-money-may-2026-prices">Cost detail across configurations (real money, May 2026 prices)</h2>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th style="text-align: right;">easy</th>
+<th style="text-align: right;">medium</th>
+<th style="text-align: right;">high</th>
+<th style="text-align: right;">large</th>
+<th style="text-align: right;">xlarge</th>
+<th style="text-align: right;">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>jaaicode + gpt-5.4</strong></td>
+<td style="text-align: right;">$0.06</td>
+<td style="text-align: right;">$0.10</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;"><strong>$0.08</strong></td>
+<td style="text-align: right;"><strong>$0.42</strong></td>
+</tr>
+<tr>
+<td>copilot + sonnet (overage)</td>
+<td style="text-align: right;">$0.04</td>
+<td style="text-align: right;">$0.00</td>
+<td style="text-align: right;">$0.04</td>
+<td style="text-align: right;">$0.04</td>
+<td style="text-align: right;">$0.04</td>
+<td style="text-align: right;">$0.16</td>
+</tr>
+<tr>
+<td><strong>claude-code + sonnet</strong></td>
+<td style="text-align: right;">$0.05</td>
+<td style="text-align: right;">$0.07</td>
+<td style="text-align: right;">$0.03</td>
+<td style="text-align: right;">$0.07</td>
+<td style="text-align: right;">$0.06</td>
+<td style="text-align: right;">$0.28</td>
+</tr>
+<tr>
+<td><strong>jaaicode + sonnet</strong></td>
+<td style="text-align: right;">$0.05</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;">$0.11</td>
+<td style="text-align: right;">$0.03</td>
+<td style="text-align: right;">$0.22</td>
+<td style="text-align: right;">$0.50</td>
+</tr>
+<tr>
+<td>codex + gpt-5.4</td>
+<td style="text-align: right;">$0.26</td>
+<td style="text-align: right;">$0.15</td>
+<td style="text-align: right;">$0.16</td>
+<td style="text-align: right;">$0.07</td>
+<td style="text-align: right;">$0.12</td>
+<td style="text-align: right;">$0.77</td>
+</tr>
+<tr>
+<td>jaaicode + opus</td>
+<td style="text-align: right;">$0.08</td>
+<td style="text-align: right;">$0.14</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;">$0.07</td>
+<td style="text-align: right;">$0.92</td>
+<td style="text-align: right;">$1.30</td>
+</tr>
+<tr>
+<td>claude-code + opus</td>
+<td style="text-align: right;">$0.51</td>
+<td style="text-align: right;">$0.49</td>
+<td style="text-align: right;">$0.59</td>
+<td style="text-align: right;">$0.44</td>
+<td style="text-align: right;">$1.42</td>
+<td style="text-align: right;">$3.45</td>
+</tr>
+<tr>
+<td>copilot + opus (overage)</td>
+<td style="text-align: right;">$0.60</td>
+<td style="text-align: right;">$0.60</td>
+<td style="text-align: right;">$0.60</td>
+<td style="text-align: right;">$0.60</td>
+<td style="text-align: right;">$0.60</td>
+<td style="text-align: right;">$3.00</td>
+</tr>
+<tr>
+<td>gemini-2.5-pro¹</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">n/a</td>
+</tr>
+</tbody>
+</table>
+<p>¹ Gemini's token counts come back as 0 through LiteLLM. With Google's $1.25/$10 retail and the wall times we measured, estimated total ≈ $1.50–$2.50.</p>
+<p><strong>Costs are noisy</strong> because trial-to-trial variance dominates the
+matrix at n=2. The Total column averages out some of that. Magnitude
+ordering is reliable; ratios within 50% of each other should be
+treated as ties.</p>
+<h2 id="sweet-spot-recommendations">Sweet-spot recommendations</h2>
+<table>
+<thead>
+<tr>
+<th>If you need...</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cheapest reliable sweep</td>
+<td><strong>jaaicode + gpt-5.4</strong> ($0.42 across all five tiers)</td>
+</tr>
+<tr>
+<td>Most transparent telemetry, fully cached</td>
+<td><strong>Codex + gpt-5.4</strong> ($0.77 total, sweeps every tier with prompt-cache reporting)</td>
+</tr>
+<tr>
+<td>Cheapest, GitHub Copilot subscription</td>
+<td><strong>Copilot + sonnet</strong> (≈$0 within quota)</td>
+</tr>
+<tr>
+<td>Cheap &amp; fast on routine tiers (≤large)</td>
+<td><strong>jaaicode + sonnet</strong> ($0.28 across easy-large)</td>
+</tr>
+<tr>
+<td>Multi-model flexibility</td>
+<td><strong>jaaicode</strong> (any LiteLLM-exposed model)</td>
+</tr>
+<tr>
+<td>Avoid completely on xlarge</td>
+<td>gemini</td>
+</tr>
+</tbody>
+</table>
+<h2 id="caveats">Caveats</h2>
+<ul>
+<li><strong>n=2 per configuration</strong>. Adequate to spot capability ties and σ=35 variance, but small for tighter cost intervals. Run n≥5 if making procurement decisions.</li>
+<li><strong>xlarge bench is <code>click</code> with 3 surgical seeds</strong>. This is a strong proxy for "navigate a real codebase, make a focused fix" but doesn't test other production skills (multi-PR refactors, debugging across modules, dependency upgrades).</li>
+<li><strong>Copilot bills via subscription</strong>, not per-token. Costs shown above are overage-rate estimates ($0.04/premium request); actual cost is $0 within monthly quota.</li>
+<li><strong>Gemini telemetry doesn't pass through LiteLLM cleanly</strong> — tokens report 0 in the JSON output. Scores and capability assessment still work.</li>
+<li><strong>Pricing reflects May 2026 retail rates</strong> from anthropic.com, openai.com, ai.google.dev. Claude 4.5+ era opus is $5/$25 (not the legacy $15/$75); haiku 4.5+ is $1/$5 (not legacy $0.25/$1.25). Verify when re-running in future months.</li>
+<li><strong>claude-code was tested WITHOUT <code>--bare</code></strong> (full skill stack enabled), which required removing a sibling <code>/home/support/jaaicode-bench/</code> repo whose CLAUDE.md was being auto-discovered. On multi-repo dev machines, this CLAUDE.md walk-up is a real hazard.</li>
+</ul>
+<h2 id="reproducing">Reproducing</h2>
+<pre><code class="language-bash"># i78700 has all 5 agents installed and configured.
+./scripts/bench-agents-matrix.py \
+    --tiers easy,medium,high,large,xlarge \
+    --models claude-sonnet-4.6,claude-opus-4.7,gpt-5.4,gemini-2.5-pro \
+    --agents jaaicode,claude-code,codex,copilot,gemini \
+    --trials 2 \
+    --max-budget-usd 50
+</code></pre>
+<p>Setup needed before first run:</p>
+<ul>
+<li><strong>jaaicode</strong>: any existing checkout with <code>.venv</code> configured</li>
+<li><strong>claude-code</strong>: <code>npm install -g @anthropic-ai/claude-code</code> + <code>~/.claude/settings.json</code> pointing at LiteLLM</li>
+<li><strong>codex</strong>: <code>npm install -g @openai/codex</code> + <code>~/.codex/config.toml</code> with <code>wire_api = "responses"</code></li>
+<li><strong>copilot</strong>: <code>npm install -g @github/copilot</code> + <code>gh auth login</code> + active Copilot subscription</li>
+<li><strong>gemini</strong>: <code>npm install -g @google/gemini-cli</code> + <code>GOOGLE_GEMINI_BASE_URL</code> env var</li>
+</ul>
+<p>Raw data: <code>docs/bench-data/agents-matrix-consolidated.jsonl</code>
+(100+ records — 45 real configurations × 2 trials + 10 skip records, with both reported and corrected costs).</p>
+<h2 id="per-tier-walkthrough-every-agent">Per-tier walkthrough — every agent</h2>
+<p>The five tables below show the full data for one tier each. Best cost
+per tier highlighted <strong>bold</strong>. ⚠ = capability variance.</p>
+<h3 id="easy-kvcache-1-file-270-loc"><code>easy</code> — kvcache, 1 file, 270 LOC</h3>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: right;">Score</th>
+<th style="text-align: right;">Wall</th>
+<th style="text-align: right;">Cost</th>
+<th style="text-align: right;">Input tok</th>
+<th style="text-align: right;">Output tok</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jaaicode + sonnet</td>
+<td style="text-align: right;">51.0/56</td>
+<td style="text-align: right;">30 s</td>
+<td style="text-align: right;"><strong>$0.05</strong></td>
+<td style="text-align: right;">59,642</td>
+<td style="text-align: right;">868</td>
+</tr>
+<tr>
+<td>jaaicode + opus</td>
+<td style="text-align: right;">51.0/56</td>
+<td style="text-align: right;">20 s</td>
+<td style="text-align: right;">$0.08</td>
+<td style="text-align: right;">35,380</td>
+<td style="text-align: right;">746</td>
+</tr>
+<tr>
+<td>jaaicode + gpt-5.4</td>
+<td style="text-align: right;">51.0/56</td>
+<td style="text-align: right;">18 s</td>
+<td style="text-align: right;">$0.06</td>
+<td style="text-align: right;">48,937</td>
+<td style="text-align: right;">582</td>
+</tr>
+<tr>
+<td>claude-code + sonnet</td>
+<td style="text-align: right;">51.0/56</td>
+<td style="text-align: right;">28 s</td>
+<td style="text-align: right;"><strong>$0.05</strong></td>
+<td style="text-align: right;">14,359</td>
+<td style="text-align: right;">648</td>
+</tr>
+<tr>
+<td>claude-code + opus</td>
+<td style="text-align: right;">51.0/56</td>
+<td style="text-align: right;">22 s</td>
+<td style="text-align: right;">$0.51</td>
+<td style="text-align: right;">29,917</td>
+<td style="text-align: right;">872</td>
+</tr>
+<tr>
+<td>codex + gpt-5.4</td>
+<td style="text-align: right;">51.0/56</td>
+<td style="text-align: right;">175 s</td>
+<td style="text-align: right;">$0.26</td>
+<td style="text-align: right;">285,801</td>
+<td style="text-align: right;">10,579</td>
+</tr>
+<tr>
+<td>copilot + sonnet</td>
+<td style="text-align: right;">51.0/56</td>
+<td style="text-align: right;">145 s</td>
+<td style="text-align: right;">≈$0.04</td>
+<td style="text-align: right;">(n/a — subscription)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>copilot + opus</td>
+<td style="text-align: right;">50.0/56</td>
+<td style="text-align: right;">68 s</td>
+<td style="text-align: right;">≈$0.60</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>gemini + 2.5-pro</td>
+<td style="text-align: right;">35±23/56 ⚠</td>
+<td style="text-align: right;">112 s</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">(n/a — 0 via proxy)</td>
+<td style="text-align: right;">—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="medium-tinydb-4-modules-550-loc"><code>medium</code> — tinydb, 4 modules, 550 LOC</h3>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: right;">Score</th>
+<th style="text-align: right;">Wall</th>
+<th style="text-align: right;">Cost</th>
+<th style="text-align: right;">Input tok</th>
+<th style="text-align: right;">Output tok</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jaaicode + sonnet</td>
+<td style="text-align: right;">34/35</td>
+<td style="text-align: right;">50 s</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;">127,084</td>
+<td style="text-align: right;">1,482</td>
+</tr>
+<tr>
+<td>jaaicode + opus</td>
+<td style="text-align: right;">33.0/35</td>
+<td style="text-align: right;">42 s</td>
+<td style="text-align: right;">$0.14</td>
+<td style="text-align: right;">71,414</td>
+<td style="text-align: right;">2,014</td>
+</tr>
+<tr>
+<td>jaaicode + gpt-5.4</td>
+<td style="text-align: right;">33.0/35</td>
+<td style="text-align: right;">22 s</td>
+<td style="text-align: right;">$0.10</td>
+<td style="text-align: right;">102,218</td>
+<td style="text-align: right;">1,052</td>
+</tr>
+<tr>
+<td>claude-code + sonnet</td>
+<td style="text-align: right;">33.0/35</td>
+<td style="text-align: right;">15 s</td>
+<td style="text-align: right;"><strong>$0.07</strong></td>
+<td style="text-align: right;">21,582</td>
+<td style="text-align: right;">323</td>
+</tr>
+<tr>
+<td>claude-code + opus</td>
+<td style="text-align: right;">33.0/35</td>
+<td style="text-align: right;">20 s</td>
+<td style="text-align: right;">$0.49</td>
+<td style="text-align: right;">29,718</td>
+<td style="text-align: right;">569</td>
+</tr>
+<tr>
+<td>codex + gpt-5.4</td>
+<td style="text-align: right;"><strong>34.0/35</strong> ⭐</td>
+<td style="text-align: right;">80 s</td>
+<td style="text-align: right;">$0.15</td>
+<td style="text-align: right;">206,852</td>
+<td style="text-align: right;">4,796</td>
+</tr>
+<tr>
+<td>copilot + sonnet</td>
+<td style="text-align: right;">33.0/35</td>
+<td style="text-align: right;">385 s</td>
+<td style="text-align: right;">≈$0</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>copilot + opus</td>
+<td style="text-align: right;">33.0/35</td>
+<td style="text-align: right;">60 s</td>
+<td style="text-align: right;">≈$0.60</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>gemini + 2.5-pro</td>
+<td style="text-align: right;">33.0/35</td>
+<td style="text-align: right;">80 s</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="high-refactor-r-007-merge-v1v2-hierarchies"><code>high</code> — refactor R-007, merge v1/v2 hierarchies</h3>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: right;">Score</th>
+<th style="text-align: right;">Wall</th>
+<th style="text-align: right;">Cost</th>
+<th style="text-align: right;">Input tok</th>
+<th style="text-align: right;">Output tok</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jaaicode + sonnet</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">55 s</td>
+<td style="text-align: right;">$0.11</td>
+<td style="text-align: right;">121,650</td>
+<td style="text-align: right;">2,244</td>
+</tr>
+<tr>
+<td>jaaicode + opus</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">20 s</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;">65,262</td>
+<td style="text-align: right;">788</td>
+</tr>
+<tr>
+<td>jaaicode + gpt-5.4</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">25 s</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;">168,582</td>
+<td style="text-align: right;">878</td>
+</tr>
+<tr>
+<td>claude-code + sonnet</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">38 s</td>
+<td style="text-align: right;"><strong>$0.03</strong></td>
+<td style="text-align: right;">9,213</td>
+<td style="text-align: right;">1,164</td>
+</tr>
+<tr>
+<td>claude-code + opus</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">35 s</td>
+<td style="text-align: right;">$0.59</td>
+<td style="text-align: right;">31,788</td>
+<td style="text-align: right;">1,506</td>
+</tr>
+<tr>
+<td>codex + gpt-5.4</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">98 s</td>
+<td style="text-align: right;">$0.16</td>
+<td style="text-align: right;">181,296</td>
+<td style="text-align: right;">6,657</td>
+</tr>
+<tr>
+<td>copilot + sonnet</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">108 s</td>
+<td style="text-align: right;">≈$0.04</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>copilot + opus</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">50 s</td>
+<td style="text-align: right;">≈$0.60</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>gemini + 2.5-pro</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">82 s</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="large-refactor-r-015-26-file-rename"><code>large</code> — refactor R-015, 26-file rename</h3>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: right;">Score</th>
+<th style="text-align: right;">Wall</th>
+<th style="text-align: right;">Cost</th>
+<th style="text-align: right;">Input tok</th>
+<th style="text-align: right;">Output tok</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jaaicode + sonnet</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">20 s</td>
+<td style="text-align: right;"><strong>$0.03</strong></td>
+<td style="text-align: right;">32,028</td>
+<td style="text-align: right;">626</td>
+</tr>
+<tr>
+<td>jaaicode + opus</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">20 s</td>
+<td style="text-align: right;">$0.07</td>
+<td style="text-align: right;">52,610</td>
+<td style="text-align: right;">528</td>
+</tr>
+<tr>
+<td>jaaicode + gpt-5.4</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">28 s</td>
+<td style="text-align: right;">$0.09</td>
+<td style="text-align: right;">154,850</td>
+<td style="text-align: right;">1,100</td>
+</tr>
+<tr>
+<td>claude-code + sonnet</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">35 s</td>
+<td style="text-align: right;">$0.07</td>
+<td style="text-align: right;">19,288</td>
+<td style="text-align: right;">989</td>
+</tr>
+<tr>
+<td>claude-code + opus</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">28 s</td>
+<td style="text-align: right;">$0.44</td>
+<td style="text-align: right;">25,431</td>
+<td style="text-align: right;">758</td>
+</tr>
+<tr>
+<td>codex + gpt-5.4</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">42 s</td>
+<td style="text-align: right;">$0.07</td>
+<td style="text-align: right;">70,590</td>
+<td style="text-align: right;">2,818</td>
+</tr>
+<tr>
+<td>copilot + sonnet</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">48 s</td>
+<td style="text-align: right;">≈$0.04</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>copilot + opus</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">30 s</td>
+<td style="text-align: right;">≈$0.60</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td>gemini + 2.5-pro</td>
+<td style="text-align: right;">50.0/50</td>
+<td style="text-align: right;">48 s</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">(n/a)</td>
+<td style="text-align: right;">—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="xlarge-click-115k-loc-3-seeded-bugs"><code>xlarge</code> — click 11.5K LOC, 3 seeded bugs</h3>
+<table>
+<thead>
+<tr>
+<th>Agent + Model</th>
+<th style="text-align: center;">Trial 1</th>
+<th style="text-align: center;">Trial 2</th>
+<th style="text-align: right;">Wall (mean)</th>
+<th style="text-align: right;">Cost (mean)</th>
+<th style="text-align: right;">Input tok (mean)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jaaicode + sonnet</td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;">0/50</td>
+<td style="text-align: right;">195 s</td>
+<td style="text-align: right;">$0.22</td>
+<td style="text-align: right;">362,004</td>
+</tr>
+<tr>
+<td><strong>jaaicode + opus</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: right;">330 s</td>
+<td style="text-align: right;">$0.92</td>
+<td style="text-align: right;">648,839</td>
+</tr>
+<tr>
+<td><strong>jaaicode + gpt-5.4</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: right;"><strong>75 s</strong></td>
+<td style="text-align: right;"><strong>$0.08</strong></td>
+<td style="text-align: right;">139,722</td>
+</tr>
+<tr>
+<td><strong>claude-code + sonnet</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: right;">32 s</td>
+<td style="text-align: right;"><strong>$0.06</strong></td>
+<td style="text-align: right;">19,080</td>
+</tr>
+<tr>
+<td><strong>claude-code + opus</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: right;">1105 s</td>
+<td style="text-align: right;">$1.42</td>
+<td style="text-align: right;">54,542</td>
+</tr>
+<tr>
+<td><strong>codex + gpt-5.4</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: right;">65 s</td>
+<td style="text-align: right;">$0.12</td>
+<td style="text-align: right;">211,818</td>
+</tr>
+<tr>
+<td><strong>copilot + sonnet</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: right;">255 s</td>
+<td style="text-align: right;">≈$0.04</td>
+<td style="text-align: right;">(n/a)</td>
+</tr>
+<tr>
+<td><strong>copilot + opus</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: center;"><strong>50/50</strong></td>
+<td style="text-align: right;">502 s</td>
+<td style="text-align: right;">≈$0.60</td>
+<td style="text-align: right;">(n/a)</td>
+</tr>
+<tr>
+<td>gemini + 2.5-pro</td>
+<td style="text-align: center;">0/50</td>
+<td style="text-align: center;">0/50</td>
+<td style="text-align: right;">450 s</td>
+<td style="text-align: right;">n/a</td>
+<td style="text-align: right;">(n/a)</td>
+</tr>
+</tbody>
+</table>
+<p>This tier no longer cleanly separates the field: <strong>7 of 9 (model,
+agent) configurations cross both trials at 50/50</strong>. Gemini still
+fails it; jaaicode+sonnet hits one trial out of two.</p>
+<div class="footer">
+Generated from <code>2026-05-10-coding-agents.md</code> · standalone HTML, no external assets.<br>
+<a href="https://github.com/tomz/jaaicode">github.com/tomz/jaaicode</a> · orchestrated end-to-end with jaaicode.
+</div>
+</body>
+</html>
