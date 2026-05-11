@@ -63,6 +63,9 @@ nav:
   - Features: features.md
   - Install: install.md
   - Showcase: showcase.md
+  - Benchmarks:
+    - benchmarks/index.md
+    - 2026-05-10 · Coding Agents (May 2026): benchmarks/2026-05-10-coding-agents.md
 
 extra:
   social:
