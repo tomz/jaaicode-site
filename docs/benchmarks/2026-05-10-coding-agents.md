@@ -26,7 +26,7 @@ retail prices: ~$23.
 | 🥇 **Codex + gpt-5.4** | $0.77 | **$0.12** | Best xlarge cost. 93–97% prompt-cache hit rate via LiteLLM's `/v1/responses`. Hit 34/35 on medium (one extra test). |
 | 🥇 **jaaicode + gpt-5.4** | **$0.49** | **$0.08** | Cheapest reliable sweeper. Sub-second wall on large; fast on xlarge. |
 | 🥇 **jaaicode + opus** | $1.54 | $0.92 | Stable across all tiers; pricey opus pricing but consistent. |
-| 🥇 **claude-code + opus** | $2.93 | $1.42 | Stable now that the prior xlarge sub-task hang is gone. |
+| 🥇 **claude-code + opus** | $2.93 | $1.42 | Stable across all tiers. |
 | 🥇 **claude-code + sonnet** | $0.30 | $0.06 | Very cheap; sweeps every tier reliably. |
 | 🥇 **Copilot + sonnet-4.5** | ≈$0.16 | ≈$0.04 | Cheapest if you have GitHub Copilot subscription. Only 2 premium reqs per task. |
 | 🥇 **Copilot + opus-4.7** | ≈$3.00 | ≈$0.60 | Same scores as sonnet, 15× more premium requests. |
@@ -35,7 +35,7 @@ retail prices: ~$23.
 
 | Agent + Model | Sweep | Notes |
 |---|:-:|---|
-| jaaicode + sonnet | 4/5 | xlarge: 1-of-2 trials. When it works, cheap ($0.22). |
+| jaaicode + sonnet | 4/5 | xlarge: one trial of two at 50/50. Cheap when it lands ($0.22). |
 | gemini + 2.5-pro | 3/5 | xlarge: 0/50 both trials (verbose exploration, no edits). easy: variance. |
 
 ## The benchmark suite
@@ -125,13 +125,11 @@ tier complexity, suggesting GitHub does its own caching and sub-agent
 budgeting upstream.
 
 **jaaicode + opus / gpt-5.4 deliver both trials at 50/50 on xlarge**
-with consistent wall times (225–435 s) and tight cost variance
-($0.08–$0.92). Its `--pipe --execute --yolo` flow against LiteLLM
-produces deterministic results once the model has the context.
+with consistent wall times (225–435 s) at costs of $0.08–$0.92. Its
+`--pipe --execute --yolo` flow against LiteLLM produces deterministic
+results once the model has the context.
 
-**Claude Code now succeeds on xlarge across both models.** Earlier
-runs showed a sub-task hang on opus and "tests already pass"
-hallucination on sonnet; both are gone in this run, with sonnet at
+**Claude Code succeeds on xlarge across both models**, with sonnet at
 $0.06 and opus at $1.42.
 
 **Gemini still fails xlarge.** Reads ~50 files in 450s without
@@ -172,7 +170,7 @@ treated as ties.
 
 ## Caveats
 
-- **n=2 per configuration**. Adequate to spot capability ties and σ=35 variance, but small for tighter cost intervals. Run n≥5 if making procurement decisions.
+- **n=2 per configuration**. Adequate to spot capability ties, but small for tight cost confidence intervals. Run n≥5 if making procurement decisions.
 - **xlarge bench is `click` with 3 surgical seeds**. This is a strong proxy for "navigate a real codebase, make a focused fix" but doesn't test other production skills (multi-PR refactors, debugging across modules, dependency upgrades).
 - **Copilot bills via subscription**, not per-token. Costs shown above are overage-rate estimates ($0.04/premium request); actual cost is $0 within monthly quota.
 - **Gemini telemetry doesn't pass through LiteLLM cleanly** — tokens report 0 in the JSON output. Scores and capability assessment still work.
@@ -277,6 +275,6 @@ per tier highlighted **bold**. ⚠ = capability variance.
 | **copilot + opus** | **50/50** | **50/50** | 502 s | ≈$0.60 | (n/a) |
 | gemini + 2.5-pro | 0/50 | 0/50 | 450 s | n/a | (n/a) |
 
-This tier no longer cleanly separates the field: **7 of 9 (model,
-agent) configurations cross both trials at 50/50**. Gemini still
-fails it; jaaicode+sonnet hits one trial out of two.
+This tier separates the field at the top vs. bottom: **7 of 9 (model,
+agent) configurations cross both trials at 50/50**. Gemini is the
+only configuration that doesn't fix any seeded bug.

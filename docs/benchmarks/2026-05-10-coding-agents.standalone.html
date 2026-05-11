@@ -200,7 +200,7 @@ retail prices: ~$23.</p>
 <td>🥇 <strong>claude-code + opus</strong></td>
 <td style="text-align: right;">$2.93</td>
 <td style="text-align: right;">$1.42</td>
-<td>Stable now that the prior xlarge sub-task hang is gone.</td>
+<td>Stable across all tiers.</td>
 </tr>
 <tr>
 <td>🥇 <strong>claude-code + sonnet</strong></td>
@@ -235,7 +235,7 @@ retail prices: ~$23.</p>
 <tr>
 <td>jaaicode + sonnet</td>
 <td style="text-align: center;">4/5</td>
-<td>xlarge: 1-of-2 trials. When it works, cheap ($0.22).</td>
+<td>xlarge: one trial of two at 50/50. Cheap when it lands ($0.22).</td>
 </tr>
 <tr>
 <td>gemini + 2.5-pro</td>
@@ -560,12 +560,10 @@ counts are stable (30 per task on opus, 2 on sonnet) regardless of
 tier complexity, suggesting GitHub does its own caching and sub-agent
 budgeting upstream.</p>
 <p><strong>jaaicode + opus / gpt-5.4 deliver both trials at 50/50 on xlarge</strong>
-with consistent wall times (225–435 s) and tight cost variance
-($0.08–$0.92). Its <code>--pipe --execute --yolo</code> flow against LiteLLM
-produces deterministic results once the model has the context.</p>
-<p><strong>Claude Code now succeeds on xlarge across both models.</strong> Earlier
-runs showed a sub-task hang on opus and "tests already pass"
-hallucination on sonnet; both are gone in this run, with sonnet at
+with consistent wall times (225–435 s) at costs of $0.08–$0.92. Its
+<code>--pipe --execute --yolo</code> flow against LiteLLM produces deterministic
+results once the model has the context.</p>
+<p><strong>Claude Code succeeds on xlarge across both models</strong>, with sonnet at
 $0.06 and opus at $1.42.</p>
 <p><strong>Gemini still fails xlarge.</strong> Reads ~50 files in 450s without
 converging. Verbose "thinking" output dominates; no edits to bug
@@ -709,7 +707,7 @@ treated as ties.</p>
 </table>
 <h2 id="caveats">Caveats</h2>
 <ul>
-<li><strong>n=2 per configuration</strong>. Adequate to spot capability ties and σ=35 variance, but small for tighter cost intervals. Run n≥5 if making procurement decisions.</li>
+<li><strong>n=2 per configuration</strong>. Adequate to spot capability ties, but small for tight cost confidence intervals. Run n≥5 if making procurement decisions.</li>
 <li><strong>xlarge bench is <code>click</code> with 3 surgical seeds</strong>. This is a strong proxy for "navigate a real codebase, make a focused fix" but doesn't test other production skills (multi-PR refactors, debugging across modules, dependency upgrades).</li>
 <li><strong>Copilot bills via subscription</strong>, not per-token. Costs shown above are overage-rate estimates ($0.04/premium request); actual cost is $0 within monthly quota.</li>
 <li><strong>Gemini telemetry doesn't pass through LiteLLM cleanly</strong> — tokens report 0 in the JSON output. Scores and capability assessment still work.</li>
@@ -1173,9 +1171,9 @@ per tier highlighted <strong>bold</strong>. ⚠ = capability variance.</p>
 </tr>
 </tbody>
 </table>
-<p>This tier no longer cleanly separates the field: <strong>7 of 9 (model,
-agent) configurations cross both trials at 50/50</strong>. Gemini still
-fails it; jaaicode+sonnet hits one trial out of two.</p>
+<p>This tier separates the field at the top vs. bottom: <strong>7 of 9 (model,
+agent) configurations cross both trials at 50/50</strong>. Gemini is the
+only configuration that doesn't fix any seeded bug.</p>
 <div class="footer">
 Generated from <code>2026-05-10-coding-agents.md</code> · standalone HTML, no external assets.<br>
 <a href="https://github.com/tomz/jaaicode">github.com/tomz/jaaicode</a> · orchestrated end-to-end with jaaicode.
