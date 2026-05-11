@@ -48,7 +48,7 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.superfences
+  - fenced_code
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.emoji:
@@ -64,7 +64,7 @@ nav:
   - Install: install.md
   - Showcase: showcase.md
   - Benchmarks:
-    - benchmarks/index.md
+    - Overview: benchmarks/index.md
     - 2026-05-10 · Coding Agents (May 2026): benchmarks/2026-05-10-coding-agents.md
 
 extra:
