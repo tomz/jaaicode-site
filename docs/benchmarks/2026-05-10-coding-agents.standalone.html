@@ -3,150 +3,359 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The entire benchmark run, data processing, report writing, and HTML">
+<meta name="author" content="Tom Zeng">
 <title>Coding Agents Benchmark — May 2026</title>
 <style>
+:root {
+    --accent:        #3949ab;
+    --accent-dark:   #283593;
+    --accent-light:  #e8eaf6;
+    --ink:           #1a1a2e;
+    --ink-soft:      #4a4a5c;
+    --ink-faint:     #6b6b80;
+    --rule:          #d8d8df;
+    --rule-soft:     #ececef;
+    --bg:            #fcfcfa;
+    --bg-panel:      #f7f7f3;
+    --bg-code:       #f3f3ee;
+    --highlight:     #fff8c5;
+    --gold:          #b88a00;
+}
 * { box-sizing: border-box; }
-html { font-size: 16px; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                 "Helvetica Neue", Arial, sans-serif;
-    color: #1f2328;
-    background: #fff;
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 40px 28px 80px;
-    line-height: 1.6;
+    font-family: "Charter", "Iowan Old Style", "Georgia", "Cambria",
+                 "Times New Roman", Times, serif;
+    font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.65;
+    margin: 0;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
-h1, h2, h3, h4 {
-    font-weight: 600;
-    line-height: 1.25;
-    margin-top: 1.8em;
-    margin-bottom: 0.6em;
-    color: #0d1117;
+
+/* ── layout ──────────────────────────────────────────────────────────── */
+.page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 32px 96px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 48px;
 }
-h1 {
-    font-size: 2.2rem;
-    border-bottom: 2px solid #d0d7de;
-    padding-bottom: 0.4em;
-    margin-top: 0;
+.content { min-width: 0; }
+.toc-rail {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 18px 14px 24px;
+    background: var(--bg-panel);
+    border-radius: 8px;
+    border: 1px solid var(--rule-soft);
 }
-h2 {
-    font-size: 1.5rem;
-    border-bottom: 1px solid #d8dee4;
-    padding-bottom: 0.3em;
+.toc-rail h4 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 10px;
+    border: 0;
+    padding: 0;
 }
-h3 { font-size: 1.2rem; }
-h4 { font-size: 1.0rem; color: #424a53; }
-p { margin: 0.8em 0; }
-a { color: #0969da; text-decoration: none; }
-a:hover { text-decoration: underline; }
-code, pre {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-                 "Liberation Mono", monospace;
-    font-size: 0.875em;
-}
-code {
-    background: #f3f4f6;
-    padding: 0.15em 0.4em;
+.toc-rail ul { list-style: none; padding: 0; margin: 0; }
+.toc-rail li { margin: 3px 0; }
+.toc-rail a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    display: block;
+    padding: 2px 6px;
     border-radius: 4px;
-    color: #0d1117;
+    border-left: 2px solid transparent;
 }
-pre {
-    background: #f6f8fa;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    padding: 14px 16px;
-    overflow-x: auto;
+.toc-rail a:hover { color: var(--accent); background: var(--accent-light); }
+.toc-rail .lvl-3 { padding-left: 14px; font-size: 0.75rem; color: var(--ink-faint); }
+
+@media (max-width: 880px) {
+    .page { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 20px 60px; }
+    .toc-rail { display: none; }
+}
+
+/* ── cover header ────────────────────────────────────────────────────── */
+.cover {
+    grid-column: 1 / -1;
+    padding: 60px 0 36px;
+    border-bottom: 3px double var(--accent);
+    margin-bottom: 36px;
+}
+.cover .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+}
+.cover h1 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: clamp(2rem, 4.6vw, 3rem);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    margin: 0 0 18px;
+    color: var(--ink);
+    border: 0;
+    padding: 0;
+}
+.cover .subtitle {
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    max-width: 56ch;
     line-height: 1.5;
 }
-pre code { background: none; padding: 0; }
-blockquote {
-    border-left: 4px solid #d0d7de;
-    padding: 0 1em;
-    color: #57606a;
-    margin: 1em 0;
+.cover .meta {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    align-items: baseline;
 }
+.cover .meta strong { color: var(--ink); font-weight: 600; }
+.cover .meta a { color: var(--accent); text-decoration: none; }
+.cover .meta a:hover { text-decoration: underline; }
+
+/* ── headings ────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.25;
+}
+.content h1 {
+    font-size: 2rem;
+    margin-top: 0;
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 0.3em;
+}
+.content h2 {
+    font-size: 1.45rem;
+    margin: 2.4em 0 0.6em;
+    padding-bottom: 0.25em;
+    border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.005em;
+}
+.content h3 {
+    font-size: 1.15rem;
+    margin: 1.8em 0 0.5em;
+    color: var(--accent-dark);
+}
+.content h4 {
+    font-size: 0.95rem;
+    margin: 1.2em 0 0.3em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* ── prose ───────────────────────────────────────────────────────────── */
+p { margin: 0.85em 0; }
+.content > p:first-of-type {
+    /* lead paragraph */
+    font-size: 1.08rem;
+    line-height: 1.6;
+    color: var(--ink);
+}
+strong { color: var(--ink); }
+em { font-style: italic; }
+hr {
+    border: 0;
+    border-top: 1px solid var(--rule);
+    margin: 2.2em 0;
+}
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+a:hover { border-bottom-color: var(--accent); }
+
+/* ── lists ───────────────────────────────────────────────────────────── */
+ul, ol { padding-left: 1.5em; margin: 0.7em 0; }
+li { margin: 0.25em 0; }
+li > p { margin: 0.3em 0; }
+
+/* ── code ────────────────────────────────────────────────────────────── */
+code, pre, kbd {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+                 "Liberation Mono", monospace;
+}
+code {
+    background: var(--bg-code);
+    border: 1px solid var(--rule-soft);
+    padding: 0.08em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: var(--ink);
+}
+pre {
+    background: var(--bg-code);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    line-height: 1.55;
+    font-size: 0.85rem;
+    margin: 1.2em 0;
+}
+pre code { background: none; padding: 0; border: 0; font-size: inherit; }
+
+/* ── blockquote ──────────────────────────────────────────────────────── */
+blockquote {
+    margin: 1.2em 0;
+    padding: 0.4em 1.2em;
+    border-left: 3px solid var(--accent);
+    color: var(--ink-soft);
+    font-style: italic;
+    background: var(--bg-panel);
+    border-radius: 0 6px 6px 0;
+}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.content { /* allow scroll on overflow */ }
 table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.2em 0;
-    font-size: 0.92rem;
-    overflow: hidden;
+    margin: 1.4em 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.86rem;
+    line-height: 1.4;
+    border: 1px solid var(--rule);
     border-radius: 6px;
-    border: 1px solid #d0d7de;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
-th, td {
-    padding: 8px 12px;
+thead { background: var(--accent); }
+thead th {
+    color: #fff;
+    font-weight: 600;
+    padding: 10px 12px;
     text-align: left;
-    border-bottom: 1px solid #eaeef2;
+    border: 0;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    letter-spacing: 0.01em;
+}
+thead th[align="right"]  { text-align: right;  }
+thead th[align="center"] { text-align: center; }
+tbody td {
+    padding: 8px 12px;
+    border-top: 1px solid var(--rule-soft);
     vertical-align: top;
 }
-th {
-    background: #f6f8fa;
-    font-weight: 600;
-    border-bottom: 2px solid #d0d7de;
-    white-space: nowrap;
-}
-td[align="right"], th[align="right"] { text-align: right; }
-td[align="center"], th[align="center"] { text-align: center; }
-tbody tr:hover { background: #f6f8fa; }
-tbody tr:last-child td { border-bottom: none; }
-hr { border: 0; border-top: 1px solid #d0d7de; margin: 2em 0; }
-ul, ol { padding-left: 1.6em; }
-li { margin: 0.25em 0; }
+tbody tr:nth-child(even) { background: var(--bg-panel); }
+tbody tr:hover { background: var(--accent-light); }
+tbody td[align="right"]  { text-align: right;  font-variant-numeric: tabular-nums; }
+tbody td[align="center"] { text-align: center; }
+tbody td code { font-size: 0.84em; }
 
-/* Admonition (mkdocs-style info/note callouts) */
-.admonition {
-    background: #ddf4ff;
-    border-left: 4px solid #0969da;
-    padding: 14px 18px;
-    margin: 1.4em 0;
-    border-radius: 6px;
-}
-.admonition.warning, .admonition.note { background: #fff8c5; border-color: #bf8700; }
-.admonition .admonition-title {
-    font-weight: 700;
-    margin: 0 0 0.4em;
-    color: #0550ae;
-}
-
-/* "About this report" block (we strip mkdocs admonition syntax, render manually) */
+/* ── about-this-report card (replaces mkdocs admonition) ─────────────── */
 .report-meta {
-    background: linear-gradient(135deg, #f6f8fa 0%, #eef2f6 100%);
-    border: 1px solid #d0d7de;
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--bg-panel) 100%);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
     border-radius: 8px;
-    padding: 18px 22px;
-    margin: 1.2em 0 2em;
+    padding: 20px 24px;
+    margin: 1.4em 0 2.4em;
     font-size: 0.95rem;
+    line-height: 1.55;
 }
-.report-meta strong { color: #0d1117; }
-
-/* Trophy/medal emojis stay inline */
-h2 + p, h3 + p { margin-top: 0.4em; }
-
-/* Print: keep it readable + page-break-friendly */
-@media print {
-    body { max-width: none; padding: 0; }
-    h1, h2, h3 { page-break-after: avoid; }
-    table, pre, blockquote { page-break-inside: avoid; }
-    a { color: #1f2328; text-decoration: none; }
-    tbody tr:hover { background: none; }
+.report-meta > strong:first-child {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-dark);
+    margin-bottom: 8px;
 }
+.report-meta p { margin: 0.5em 0; }
+.report-meta a { color: var(--accent-dark); }
 
-/* Header footer footnote */
+/* ── medal / trophy emphasis ─────────────────────────────────────────── */
+.content td strong { color: var(--ink); }
+.content td:has(strong) { font-weight: 500; }
+
+/* ── footer ──────────────────────────────────────────────────────────── */
 .footer {
-    margin-top: 4em;
-    padding-top: 1.2em;
-    border-top: 1px solid #d0d7de;
-    color: #57606a;
-    font-size: 0.85rem;
+    grid-column: 1 / -1;
+    margin-top: 60px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
     text-align: center;
+    line-height: 1.6;
+}
+.footer a { color: var(--ink-soft); }
+.footer .brand {
+    display: inline-block;
+    font-weight: 600;
+    color: var(--accent-dark);
+}
+
+/* ── print ───────────────────────────────────────────────────────────── */
+@media print {
+    body { background: #fff; }
+    .page {
+        display: block;
+        max-width: none;
+        padding: 0;
+    }
+    .toc-rail { display: none; }
+    .cover { padding-top: 0; }
+    .content h1 { font-size: 1.8rem; }
+    .content h2 { font-size: 1.3rem; page-break-after: avoid; }
+    .content h3 { font-size: 1.05rem; page-break-after: avoid; }
+    table, pre, blockquote, .report-meta { page-break-inside: avoid; }
+    thead { display: table-header-group; }   /* repeat headers across pages */
+    tbody tr:hover { background: none; }
+    a { color: var(--ink); border-bottom-color: transparent; }
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.75em;
+        color: var(--ink-faint);
+        font-weight: normal;
+    }
+    .footer { font-size: 0.7rem; }
+    @page { margin: 0.7in 0.6in; }
 }
 </style>
 </head>
 <body>
-<h1 id="coding-agents-benchmark-may-2026">Coding Agents Benchmark — May 2026</h1>
+<div class="page">
+  <header class="cover">
+    <p class="eyebrow">Monthly Report · May 2026</p>
+    <h1>Coding Agents Benchmark — May 2026</h1>
+    <p class="subtitle">The entire benchmark run, data processing, report writing, and HTML</p>
+    <p class="meta">
+      <span><strong>Tom Zeng</strong> · <a href="https://github.com/tomz">github.com/tomz</a></span>
+      <span>Generated <strong>2026-05-11</strong></span>
+      <span>Orchestrated end-to-end with <a href="https://github.com/tomz/jaaicode"><strong>jaaicode</strong></a></span>
+    </p>
+  </header>
+
+  <article class="content">
 <div class="report-meta">
 <strong>About this report</strong>
 
@@ -1174,9 +1383,35 @@ per tier highlighted <strong>bold</strong>. ⚠ = capability variance.</p>
 <p>This tier separates the field at the top vs. bottom: <strong>7 of 9 (model,
 agent) configurations cross both trials at 50/50</strong>. Gemini is the
 only configuration that doesn't fix any seeded bug.</p>
-<div class="footer">
-Generated from <code>2026-05-10-coding-agents.md</code> · standalone HTML, no external assets.<br>
-<a href="https://github.com/tomz/jaaicode">github.com/tomz/jaaicode</a> · orchestrated end-to-end with jaaicode.
+  </article>
+
+  <aside class="toc-rail">
+<h4>Contents</h4>
+<ul>
+<li class="lvl-2"><a href="#executive-summary">Executive summary</a></li>
+<li class="lvl-2"><a href="#the-benchmark-suite">The benchmark suite</a></li>
+<li class="lvl-2"><a href="#the-five-agents">The five agents</a></li>
+<li class="lvl-2"><a href="#headline-matrix-score-cost-per-configuration">Headline matrix — score / cost per configuration</a></li>
+<li class="lvl-3"><a href="#capability-sweep-table">Capability sweep table</a></li>
+<li class="lvl-2"><a href="#why-the-xlarge-tier-matters">Why the xlarge tier matters</a></li>
+<li class="lvl-2"><a href="#cost-detail-across-configurations-real-money-may-2026-prices">Cost detail across configurations (real money, May 2026 prices)</a></li>
+<li class="lvl-2"><a href="#sweet-spot-recommendations">Sweet-spot recommendations</a></li>
+<li class="lvl-2"><a href="#caveats">Caveats</a></li>
+<li class="lvl-2"><a href="#reproducing">Reproducing</a></li>
+<li class="lvl-2"><a href="#per-tier-walkthrough-every-agent">Per-tier walkthrough — every agent</a></li>
+<li class="lvl-3"><a href="#easy-kvcache-1-file-270-loc">easy — kvcache, 1 file, 270 LOC</a></li>
+<li class="lvl-3"><a href="#medium-tinydb-4-modules-550-loc">medium — tinydb, 4 modules, 550 LOC</a></li>
+<li class="lvl-3"><a href="#high-refactor-r-007-merge-v1v2-hierarchies">high — refactor R-007, merge v1/v2 hierarchies</a></li>
+<li class="lvl-3"><a href="#large-refactor-r-015-26-file-rename">large — refactor R-015, 26-file rename</a></li>
+<li class="lvl-3"><a href="#xlarge-click-115k-loc-3-seeded-bugs">xlarge — click 11.5K LOC, 3 seeded bugs</a></li>
+</ul></aside>
+
+  <footer class="footer">
+    Generated from <code>2026-05-10-coding-agents.md</code> · standalone HTML, no external assets.
+    <br>
+    <span class="brand">jaaicode</span> — agent that orchestrates other agents ·
+    <a href="https://github.com/tomz/jaaicode">github.com/tomz/jaaicode</a>
+  </footer>
 </div>
 </body>
 </html>
